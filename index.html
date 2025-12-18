@@ -3,185 +3,224 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Auto Quiz — 220 Questions</title>
+<title>IQ Test — Auto Quiz</title>
 
 <style>
-:root{--bg:#fff7fb;--card:#fff;--primary:#ff6b6b}
+:root{
+  --bg:#ffffff;
+  --card:#ffe6ea;
+  --border:#e53935;
+  --primary:#e53935;
+  --green:#4caf50;
+}
+
 *{box-sizing:border-box}
+
 body{
-  font-family:system-ui,Arial;
+  margin:0;
+  font-family:Poppins,system-ui,Arial;
   background:var(--bg);
-  margin:0;padding:20px;
-  display:flex;justify-content:center;align-items:center;
   min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.app{max-width:720px;width:100%}
+
+.app{
+  max-width:420px;
+  width:100%;
+  padding:12px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.badge{
+  display:inline-block;
+  padding:6px 20px;
+  font-weight:800;
+  border-radius:12px;
+  background:linear-gradient(90deg,#00c6ff,#faff00);
+  color:#000;
+  margin-bottom:10px;
+}
+
 .card{
-  background:#fff;
-  padding:20px;
+  background:var(--card);
+  border:4px solid var(--border);
   border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.1)
+  padding:16px;
 }
+
 #circleTimer{
-  width:90px;height:90px;
+  width:80px;
+  height:80px;
   border:4px solid var(--primary);
   border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 12px;
-  font-size:22px;font-weight:700;color:var(--primary)
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 10px;
+  font-size:22px;
+  font-weight:800;
+  color:var(--primary);
 }
-.title{text-align:center;font-weight:700;font-size:20px}
-.question{text-align:center;font-size:26px;font-weight:700;margin:15px 0}
+
+.question{
+  font-size:24px;
+  font-weight:800;
+  text-align:center;
+  margin:14px 0;
+}
+
 .opt{
-  width:100%;padding:14px;margin-bottom:10px;
-  border-radius:10px;border:1px solid #eee;
-  background:#fafafa;font-weight:600;
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:10px;
+  border:2px solid #ddd;
+  background:#fff;
+  font-weight:700;
+  font-size:16px;
 }
-.opt.correct{background:#e6ffef}
-.opt.wrong{background:#ffecec}
-.opt.disabled{pointer-events:none}
-.footer{text-align:center;font-size:13px;color:#555}
+
+.opt.correct{
+  background:#e6ffef;
+  border-color:#4caf50;
+}
+
+.opt.wrong{
+  background:#ffecec;
+  border-color:#e53935;
+}
+
+.opt.disabled{
+  pointer-events:none;
+}
+
+.footer{
+  margin-top:10px;
+  text-align:center;
+  background:var(--green);
+  color:#000;
+  font-weight:800;
+  padding:6px;
+  border-radius:6px;
+}
 </style>
 </head>
 
 <body>
-<div class="app card">
+<div class="app">
 
-<div id="circleTimer">90</div>
-<div class="title">अगर जोस में पढ़ाई करते हो, तो उत्तर दो 🔥</div>
-<div class="question" id="question">लोड हो रहा है…</div>
-<div id="options"></div>
-<div class="footer">Mishra Electronic Tikra</div>
+  <div class="header">
+    <div class="badge">IQ TEST</div>
+  </div>
 
+  <div class="card">
+
+    <div id="circleTimer">90</div>
+
+    <div class="question" id="question">लोड हो रहा है…</div>
+    <div id="options"></div>
+
+    <div class="footer">Comment Your Answer</div>
+
+  </div>
 </div>
 
 <script>
 // ===== CONFIG =====
-const QUESTION_TIME_SECONDS = 90;
-const TOTAL_QUESTIONS = 220;
-const AUTO_NEXT_MS = 3000;
+const QUESTION_TIME = 90;
+const AUTO_NEXT_MS = 2500;
 
 // ===== AUDIO =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioCtx();
 
-// हर second की हल्की tick आवाज
-function secondTick(){
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = 900;
-  gain.gain.value = 0.08;
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.08);
+function tickSound(){
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.frequency.value=900;
+  g.gain.value=0.07;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+0.08);
 }
 
-// जवाब / टाइम-अप पर तेज आवाज
-function loudBeep(){
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = "square";
-  osc.frequency.value = 1200;
-  gain.gain.value = 0.4;
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.35);
+function loudSound(){
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.type="square";
+  o.frequency.value=1200;
+  g.gain.value=0.4;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+0.35);
 }
 
-// ===== QUESTIONS =====
-function generateQuestions(n){
-  const list=[], used=new Set(), ops=['+','-','×','÷'];
-  while(list.length<n){
-    let a=~~(Math.random()*30)+1;
-    let b=~~(Math.random()*30)+1;
-    let op=ops[~~(Math.random()*4)];
-    let ans;
-    if(op==='+') ans=a+b;
-    if(op==='-') ans=a-b;
-    if(op==='×') ans=a*b;
-    if(op==='÷'){ if(a%b!==0) continue; ans=a/b;}
-    let q=`${a} ${op} ${b} = ?`;
-    if(used.has(q)) continue;
-    used.add(q);
-    let opts=new Set([ans]);
-    while(opts.size<4) opts.add(ans+~~(Math.random()*10)-5);
-    let arr=[...opts].sort(()=>Math.random()-0.5);
-    list.push({q,options:arr,answerIndex:arr.indexOf(ans)});
-  }
-  return list;
-}
+// ===== IQ QUESTIONS =====
+const questions=[
+ {q:"7 + 3 = ?",o:[100,90,80,70],a:0},
+ {q:"6 + 2 = ?",o:[64,16,36,48],a:0},
+ {q:"5 + 4 = ?",o:[81,45,41,25],a:0},
+ {q:"4 + 8 = ?",o:[144,96,48,64],a:0}
+];
 
-const questions = generateQuestions(TOTAL_QUESTIONS);
-
-// ===== QUIZ LOGIC =====
-let idx=0, remaining=QUESTION_TIME_SECONDS, timer=null, revealed=false;
+let i=0,time=QUESTION_TIME,timer=null,done=false;
 const qEl=document.getElementById("question");
 const optEl=document.getElementById("options");
-const timerEl=document.getElementById("circleTimer");
+const tEl=document.getElementById("circleTimer");
 
-function renderTimer(){timerEl.textContent=remaining;}
-
-function renderQuestion(){
-  const it=questions[idx];
-  qEl.textContent=it.q;
+function loadQ(){
+  const x=questions[i];
+  qEl.textContent=x.q;
   optEl.innerHTML="";
-  it.options.forEach((t,i)=>{
+  x.o.forEach((v,n)=>{
     let b=document.createElement("button");
     b.className="opt";
-    b.textContent=String.fromCharCode(65+i)+". "+t;
-    b.onclick=()=>selectOption(i);
+    b.textContent=String.fromCharCode(65+n)+". "+v;
+    b.onclick=()=>select(n);
     optEl.appendChild(b);
   });
-  revealed=false;
+  done=false;
 }
 
-function revealAnswer(){
-  if(revealed) return;
-  revealed=true;
-  const it=questions[idx];
-  [...optEl.children].forEach((el,i)=>{
-    el.classList.add("disabled",i===it.answerIndex?"correct":"wrong");
+function select(n){
+  if(done) return;
+  done=true;
+  loudSound();
+  [...optEl.children].forEach((b,j)=>{
+    b.classList.add("disabled",j===questions[i].a?"correct":"wrong");
   });
-}
-
-function selectOption(){
-  loudBeep();      // 🔊 तेज आवाज
-  revealAnswer();
   clearInterval(timer);
-  setTimeout(nextQuestion,AUTO_NEXT_MS);
+  setTimeout(next,AUTO_NEXT_MS);
 }
 
-function nextQuestion(){
-  idx=(idx+1)%questions.length;
-  remaining=QUESTION_TIME_SECONDS;
-  renderQuestion();
-  renderTimer();
-  startTimer();
+function next(){
+  i=(i+1)%questions.length;
+  time=QUESTION_TIME;
+  tEl.textContent=time;
+  loadQ();
+  start();
 }
 
-function startTimer(){
+function start(){
   clearInterval(timer);
   timer=setInterval(()=>{
-    remaining--;
-    secondTick();  // ⏱️ हर second आवाज
-    renderTimer();
-    if(remaining<=0){
-      loudBeep();  // 🔊 time up
-      revealAnswer();
-      clearInterval(timer);
-      setTimeout(nextQuestion,AUTO_NEXT_MS);
+    time--;
+    tickSound();
+    tEl.textContent=time;
+    if(time<=0){
+      loudSound();
+      select(-1);
     }
   },1000);
 }
 
 // INIT
-renderQuestion();
-renderTimer();
-startTimer();
+loadQ();
+start();
 </script>
-
 </body>
 </html>
